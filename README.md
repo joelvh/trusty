@@ -58,6 +58,33 @@ another_config = Vars.config.another_config
 hash_of_configs = Vars.config
 ```
 
+### Omniauth
+
+To easily map Omniauth data to your `User` and/or `Idenity` models with a `User#identities` relationship, use the `Trusty::Omniauth::ProviderMapper` class. Both ActiveRecord and Mongoid are supported.
+
+Add this line to your application's Gemfile:
+
+    gem 'trusty', require: 'trusty/omniauth'
+
+Just pass in the Omniauth `Hash` provided in the environment variable to the [`ProviderMapper`](lib/trusty/omniauth/provider_mapper.rb) and you can use the helper methods to populate your models. Check out  for more options.
+
+```Ruby
+omniauth = request.env['omniauth.auth']
+
+# these are some default options that you can override
+options = {
+  user_model: User,
+  user_attributes_names: User.column_names,
+  identity_model: Identity,
+  identity_attribute_names: Identity.column_names
+}
+
+# Here is a class that you can use to deal with your model instances, 
+# whether finding a user based on their identity or adding a new identity to a user, 
+# or even creating a new user with the identity.
+mapper = Trusty::Omniauth::ProviderMapper.new(omniauth, options)
+```
+
 ### YAML
 
 Use `Trusty::Utilities::Yaml` to load a file or content. 
