@@ -48,7 +48,7 @@ module Trusty
       end
       
       def default_env_section
-        @default_env_section ||= ENV['ENV_SECTION'] || Rails.env
+        @default_env_section ||= ENV['ENV_SECTION'] || ENV['RAILS_ENV'] || ENV['RACK_ENV']
       end
       
       def config(default_value = nil)
@@ -59,7 +59,7 @@ module Trusty
       end
       
       def paths
-        @paths ||= [ Rails.root.join("config").to_s ]
+        @paths ||= defined?(Rails) ? [ Rails.root.join("config").to_s ] : []
       end
       
       # dynamically add methods that forward to config
@@ -97,3 +97,6 @@ module Trusty
     extend ClassMethods
   end
 end
+
+# copy out of namespace
+Vars = Trusty::Environment
