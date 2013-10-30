@@ -116,6 +116,41 @@ result = Trusty::Utilities::YamlContext.render content do |context|
 end
 ```
 
+### `method_missing` Helpers
+
+If you want to dynamically add boolean methods to a class, use `Trusty::Utilities::MethodName`. 
+It will allow you to return a boolean for a method that ends with '?'. 
+It will also dynamically define the methods for you with a simple module to extend your class called `Trusty::Utilities::MethodNameExtensions`. 
+
+If you want more control over what happens in your `method_missing` method, you can use [`MethodName`](lib/trusty/utilities/method_name.rb) instances to give you information about the method name you are handling.
+
+```Ruby
+target      = MyModel.new
+method_name = "confirmed_at?"
+
+# get info about the method name inside method_missing
+method_info = Trusty::Utilities::MethodName.new(method_name)
+
+# see if it's a boolean method
+method_info.boolean? # true
+
+# if you want to see what the value is for the method name without the '?'
+method_name.base_value_for target # "2013-10-30 19:41:40 UTC"
+
+# get the boolean value
+method_name.method_value_for target # true
+
+# define the helper method on the target (if it isn't already on there)
+method_name.define_for target # true
+```
+
+Make this functionality automatic by including the `Trusty::Utilities::MethodNameExtensions` module in your class.
+
+```Ruby
+class MyModel
+  include Trusty::Utilities::MethodNameExtensions
+end
+```
 
 ## Contributing
 
