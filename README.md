@@ -58,6 +58,37 @@ another_config = Vars.config.another_config
 hash_of_configs = Vars.config
 ```
 
+### YAML
+
+Use `Trusty::Utilities::Yaml` to load a file or content. 
+An instance of `Trusty::Utilities::YamlContext` is used for rendering YAML and is used as the context. 
+If you pass a block to the method where you pass in the file or content, you can include modules and so on in the context if necessary.
+
+```Ruby
+# load a file
+relative_path = "yaml/filename.yml"
+
+# optional: pass in an array of paths where to search for the file
+optional_paths = [ Rails.root, Rails.root.join('config') ]
+
+# Render YAML and any ERB blocks
+result = Trusty::Utilities::Yaml.load_file(relative_path, optional_paths) do |context|
+  # optionally use a block to modify the context (YamlContext instance)
+end
+```
+
+You can use `YamlContext` directly:
+
+```Ruby
+# load the content from the file
+content = File.read Trusty::Utilities::PathFinder.find(relative_path, optional_paths)
+
+# render the YAML as a Ruby object
+result = Trusty::Utilities::YamlContext.render content do |context|
+  # optionally use a block to modify the context (YamlContext instance)
+end
+```
+
 
 ## Contributing
 
