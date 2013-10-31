@@ -3,4 +3,4 @@ require_relative "trusty/environment"
 require_relative "trusty/utilities"
 
 # copy out of namespace
-Vars = Trusty::Environment
+::Vars = Trusty::Environment
