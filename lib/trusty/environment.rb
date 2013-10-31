@@ -1,3 +1,4 @@
+require_relative "utilities"
 require_relative "environment/dot_file_parser"
 
 module Trusty
@@ -96,6 +97,3 @@ module Trusty
     extend ClassMethods
   end
 end
-
-# copy out of namespace
-::Vars = Trusty::Environment
