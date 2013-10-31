@@ -1,3 +1,5 @@
+require_relative 'mapping_helpers'
+
 module Trusty
   module Omniauth
     class ProviderMapper

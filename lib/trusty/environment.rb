@@ -1,4 +1,3 @@
-require_relative "utilities"
 require_relative "environment/dot_file_parser"
 
 module Trusty
@@ -99,4 +98,4 @@ module Trusty
 end
 
 # copy out of namespace
-Vars = Trusty::Environment
+::Vars = Trusty::Environment
