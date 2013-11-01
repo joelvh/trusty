@@ -1,4 +1,5 @@
-require_relative 'mapping_helpers'
+require 'trusty/omniauth/mapping_helpers'
+require 'trusty/omniauth/model_mapper'
 
 module Trusty
   module Omniauth

@@ -1,3 +1,6 @@
+require 'trusty/utilities/path_finder'
+require 'trusty/utilities/yaml_context'
+
 module Trusty
   module Utilities
     module Yaml

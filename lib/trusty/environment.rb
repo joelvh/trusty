@@ -1,5 +1,6 @@
-require_relative "utilities"
-require_relative "environment/dot_file_parser"
+require 'hashie'
+require 'trusty/utilities/method_name_extensions'
+require 'trusty/utilities/yaml'
 
 module Trusty
   module Environment

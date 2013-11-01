@@ -1,3 +1,5 @@
+require 'trusty/utilities/method_name'
+
 module Trusty
   module Utilities
     module MethodNameExtensions
