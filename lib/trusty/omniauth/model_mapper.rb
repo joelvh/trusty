@@ -1,6 +1,8 @@
+require 'trusty/omniauth/mapping_helpers'
+
 module Trusty
   module Omniauth
-    class ModelImporter
+    class ModelMapper
       include MappingHelpers
       
       def initialize(provider, options = {})
@@ -43,7 +45,6 @@ module Trusty
           []
         end
       end
-      
     end
   end
 end
