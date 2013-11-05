@@ -60,7 +60,7 @@ module Trusty
       end
       
       def paths
-        @paths ||= defined?(Rails) ? [ Rails.root.join("config").to_s ] : []
+        @paths ||= defined?(::Rails) ? [ ::Rails.root.join("config").to_s ] : []
       end
       
       # dynamically add methods that forward to config
