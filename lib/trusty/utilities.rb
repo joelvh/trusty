@@ -1,5 +1,2 @@
-module Trusty
-  module Utilities
-    
-  end
-end
+require 'trusty/utilities/method_name'
+require 'trusty/utilities/method_name_extensions'
