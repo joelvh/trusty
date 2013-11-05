@@ -1,0 +1,1 @@
+require 'trusty/rails/engine'
