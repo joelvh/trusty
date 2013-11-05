@@ -152,6 +152,46 @@ class MyModel
 end
 ```
 
+### Error Handling
+
+You can include the `Trusty::Errors::Retry` module to call the `retry_block` helper method to retry a block of code. 
+This is useful when dealing with HTTP errors and such things with APIs and so on. 
+You can also easily add the retry behavior to a method with the same options you would pass to `retry_block`.
+
+```Ruby
+class MyModel
+  include Trusty::Errors::Retry
+  
+  def api_request
+    retry_block :retry => 3 do
+      # ... some API calls ...
+    end
+  end
+  
+  # add retry behavior to any method
+  def api_request2
+    # ... some API calls ...
+  end
+  retry_method :api_request2, :retry => 3
+  
+end
+```
+
+#### Exception Notification Integration
+
+If you use the "ExceptionNotification" gem, requiring `trusty/exception_notification` will automatically listen for exceptions thrown and handled from `Trusty::Errors::*`. 
+Exceptions handled by Trusty will include contextual data and the `env` data for ExceptionNotification to include in error emails.
+
+### Rails Extensions
+
+Require `trusty/rails` to register the `Trusty::Rails::Engine` and add some extensions to Rails. 
+Controller extensions are added to fix quirks such as making sure Flash messages aren't lost on redirect. 
+Error handling in Rake and ExceptionNotification are also wired up to listen to exceptions handled by Trusty (see above).
+
+### Iron.io
+
+The `Trusty::IronIo::QueueProcessor` makes it easy to pull messages off a queue.
+
 ## Contributing
 
 1. Fork it
