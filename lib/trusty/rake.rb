@@ -16,7 +16,7 @@ module Trusty
     end
   
     def self.handle_exceptions!
-      Rake.application.instance_eval do
+      ::Rake.application.instance_eval do
         class << self
           # include this module
           include Rake
