@@ -33,7 +33,11 @@ module Trusty
       end
       
       def update_record!(record)
-        record.update_attributes!(attributes, :without_protection => true)
+        if Rails::VERSION::MAJOR >= 4
+          record.update_attributes!(attributes)
+        else
+          record.update_attributes!(attributes, without_protection: true)
+        end
       end
       
       def column_names

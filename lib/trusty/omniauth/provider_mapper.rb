@@ -91,6 +91,7 @@ module Trusty
       ###### General ######
       
       def attributes(*filter_attribute_names)
+        puts "provider_attributes: #{provider_attributes.inspect}"
         unless @attributes
           info            = provider_attributes.fetch('info', {})
           credentials     = provider_attributes['credentials']
