@@ -119,7 +119,9 @@ module Trusty
             :expires_at     => (Time.at(credentials['expires_at']) rescue nil),
             :raw_info       => provider_attributes['extra'].except('access_token').as_json,
             # extra
-            :time_zone      => Time.zone.name
+            :location       => info['location'],
+            :time_zone      => info['time_zone'] || Time.zone.name,
+            :locale         => info['locale'] || I18n.locale
           }.with_indifferent_access
           
           @attributes.reject!{|_,value| value.nil?} if options[:skip_nils]
