@@ -18,26 +18,25 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_development_dependency "bundler", "~> 1.3"
-  spec.add_development_dependency "rake"
+  spec.add_development_dependency "bundler", ">= 1.3"
   
   # Trusty::Rails (and defined?(Rails) checks sprinkled throughout)
-  spec.add_development_dependency "rails"
+  spec.add_development_dependency "rails", ">= 3"
   
   # Trusty::Omniauth
-  spec.add_development_dependency "omniauth"
+  spec.add_development_dependency "omniauth", "~> 1"
   
   # Trusty::Errors::ExceptionHandlers
-  spec.add_development_dependency "active_support" # active_support/notifications
+  spec.add_development_dependency "activesupport", ">= 3" # active_support/notifications
   
   # Trusty::ExceptionNotification
-  spec.add_development_dependency "exception_notification"
+  spec.add_development_dependency "exception_notification", ">= 3"
   
   # Trusty::Rake
-  spec.add_development_dependency "rake"
+  spec.add_development_dependency "rake", ">= 9"
   
   # Trusty::IronIo::QueueProcessor
-  spec.add_development_dependency "typhoeus" # used by iron_mq
+  spec.add_development_dependency "typhoeus", ">= 0.8" # used by iron_mq
   spec.add_development_dependency "iron_mq"
   
   # Trusty::Environment
