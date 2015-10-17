@@ -64,14 +64,14 @@ module Trusty
       
       # USER
       
-      def build_user
-        @provider_user.build_record
+      def build_user(attributes = {})
+        @provider_user.build_record(attributes)
       end
       
       # IDENTITY
       
-      def build_identity
-        @provider_identity.build_record
+      def build_identity(attributes = {})
+        @provider_identity.build_record(attributes)
       end
       
       def build_identity_for_user(user)

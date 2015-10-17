@@ -28,8 +28,8 @@ module Trusty
         end
       end
       
-      def build_record
-        model.new(attributes, :without_protection => true)
+      def build_record(additional_attributes = {})
+        model.new(attributes.merge(additional_attributes), without_protection: true)
       end
       
       def update_record!(record)
