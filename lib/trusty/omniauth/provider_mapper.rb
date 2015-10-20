@@ -17,6 +17,8 @@ module Trusty
       # - :identity_model = Identity model
       # - :identity_attributes = Hash of attributes to merge into identity_attributes
       # - :identity_attribute_names = Array of attribute names to copy from Omniauth data (default: Identity.column_names)
+      # - :identity_required_criteria = Hash of criteria to use to find identities, and also to merge into attributes
+      # - :unique_identifiers = Array of column names that identify a model uniquely with omniauth data
       # - :skip_raw_info (default: false) = Boolean whether to exclude OmniAuth "extra" data in identity_attributes[:raw_info]
       # - :skip_nils (default: true) = Boolean whether to remove attributes with nil values
       def initialize(provider_attributes, options = {})
@@ -30,36 +32,66 @@ module Trusty
         }.merge(options)
         
         @provider_identity = ModelMapper.new(self,
-          :model            => @options[:identity_model] || Identity,
-          :attributes       => @options[:identity_attributes],
-          :attribute_names  => @options[:identity_attribute_names]
+          :model              => @options[:identity_model] || Identity,
+          :attributes         => @options[:identity_attributes],
+          :attribute_names    => @options[:identity_attribute_names],
+          :unique_identifiers => @options[:unique_identifiers] || [:provider, :uid],
+          :required_criteria  => @options[:identity_required_criteria]
         )
         @provider_user = ModelMapper.new(self,
-          :model            => @options[:user_model] || User,
-          :attributes       => @options[:user_attributes],
-          :attribute_names  => @options[:user_attribute_names]
+          :model              => @options[:user_model] || User,
+          :attributes         => @options[:user_attributes],
+          :attribute_names    => @options[:user_attribute_names],
+          :unique_identifiers => @options[:unique_identifiers] || [:email]
         )
       end
       
       # Query existing
-      
-      def user
-        # first try to find the user based on provider/uid combo
-        @user ||= find_user_by_identity
-        # find the user by email if not found by identity
-        @user ||= find_user_by_email
+
+      def find_identities_for_user(user)
+        @provider_identity.find_records(user_id: user.id)
       end
       
-      def identity
-        @identity ||= find_identity_by_user
+      # Matched identities based on omniauth unique identifiers (provider, uid)
+      def matched_identities
+        @matched_identities ||= @provider_identity.find_records
+      end
+
+      def identities_exist?
+        matched_identities.any?
+      end
+
+      def single_identity?
+        matched_identities.size == 1
+      end
+
+      def multiple_identities?
+        matched_identities.size > 1
       end
       
-      def user_exists?
-        !user.nil?
+      # Matched users based on omniauth unique identifiers (email)
+      def matched_users
+        @matched_users ||= @provider_user.find_records
+      end
+
+      def users_exist?
+        matched_users.any?
+      end
+
+      def single_user?
+        matched_users.size == 1
+      end
+
+      def multiple_users?
+        matched_users.size > 1
       end
       
-      def identity_exists?
-        !identity.nil?
+      def single_user
+        @single_user ||= matched_users.first if single_user?
+      end
+      
+      def single_identity
+        @single_identity ||= matched_identities.first if single_identity?
       end
       
       # USER
@@ -75,16 +107,15 @@ module Trusty
       end
       
       def build_identity_for_user(user)
-        build_identity.tap do |identity|
-          # this assumes there is an inverse relationship automatically created
-          # such as user.identities would now contain this identity for the user
-          identity.user = user
-        end
+        # build_identity.tap do |identity|
+        #   # this assumes there is an inverse relationship automatically created
+        #   # such as user.identities would now contain this identity for the user
+        #   identity.user = user
+        # end
+        build_identity(user: user)
       end
       
-      def update_existing_identity!
-        raise "Identity doesn't exist!" unless identity
-        
+      def update_identity!(identity)
         @provider_identity.update_record!(identity)
       end
       
@@ -113,6 +144,7 @@ module Trusty
             :phone          => clean(info['phone']),
             :image_url      => info['image'],
             :profile_url    => info.fetch('urls', {})['public_profile'],
+            :token_type     => clean(credentials['token_type']),
             :token          => clean(credentials['token']),
             :secret         => clean(credentials['secret']),
             :refresh_token  => clean(credentials['refresh_token']),
@@ -134,26 +166,6 @@ module Trusty
         else
           @attributes.dup
         end
-      end
-      
-      private
-      
-      def find_user_by_identity
-        if defined?(Mongoid::Document) && @provider_user.model.include?(Mongoid::Document)
-          @provider_user.model.elem_match(:identities => @provider_identity.attributes(:provider, :uid)).first
-        else
-          @provider_user.model.where(
-            :id => @provider_identity.model.where( @provider_identity.attributes(:provider, :uid) ).select(:user_id)
-          ).first
-        end
-      end
-      
-      def find_user_by_email
-        @provider_user.model.where( @provider_identity.attributes(:email) ).first
-      end
-      
-      def find_identity_by_user
-        user && user.identities.where( @provider_identity.attributes(:provider, :uid) ).first
       end
       
     end

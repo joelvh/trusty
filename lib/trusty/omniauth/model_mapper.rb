@@ -4,10 +4,15 @@ module Trusty
   module Omniauth
     class ModelMapper
       include MappingHelpers
+
+      attr_reader :unique_identifiers, :required_criteria
       
       def initialize(provider, options = {})
         @provider = provider
         @options  = options
+
+        @unique_identifiers = @options.fetch(:unique_identifiers, []).map(&:to_s)
+        @required_criteria  = stringify_keys @options.fetch(:required_criteria, {})
       end
       
       def model
@@ -15,11 +20,12 @@ module Trusty
       end
       
       def attribute_names
-        @attribute_names ||= @options[:attribute_names] || column_names
+        # Remove required_criteria so that existing attributes are skipped
+        @attribute_names ||= (@options[:attribute_names] || column_names).map(&:to_s) - required_criteria.keys
       end
       
       def attributes(*filter_attribute_names)
-        @attributes ||= @provider.attributes(*attribute_names).merge!(@options[:attributes])
+        @attributes ||= @provider.attributes(*attribute_names).merge(stringify_keys @options[:attributes]).merge(required_criteria)
         
         if filter_attribute_names.any?
           @attributes.slice(*filter_attribute_names)
@@ -29,9 +35,15 @@ module Trusty
       end
       
       def build_record(additional_attributes = {})
-        model.new(attributes.merge(additional_attributes), without_protection: true)
+        model.new(attributes.merge(required_criteria).merge(additional_attributes), without_protection: true)
       end
       
+      def find_records(additional_criteria = {})
+        conditions = model.where( attributes(*unique_identifiers) )
+        conditions = conditions.where(additional_criteria) unless additional_criteria.empty?
+        conditions.where(required_criteria)
+      end
+
       def update_record!(record)
         if Rails::VERSION::MAJOR >= 4
           record.update_attributes!(attributes)
@@ -49,6 +61,11 @@ module Trusty
           []
         end
       end
+
+      protected
+        def stringify_keys(original_hash)
+          original_hash.each_with_object({}){|(key, value), hash| hash[key.to_s] = value}
+        end
     end
   end
 end
