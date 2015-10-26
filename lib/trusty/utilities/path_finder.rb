@@ -3,9 +3,9 @@ module Trusty
     module PathFinder
       module ClassMethods
         def find(filename, paths = [])
-          if File.exists? filename
+          if File.file?(filename)
             filename
-          elsif root = paths.find{|path| File.exists?(File.join(path, filename))}
+          elsif root = Array(paths).find{|path| File.file?(File.join(path, filename))}
             File.join(root, filename)
           end
         end
