@@ -108,17 +108,9 @@ module Trusty
 
       # IDENTITY
 
-      def build_identity(attributes = {})
-        @provider_identity.build_record(attributes)
-      end
-
-      def build_identity_for_user(user)
-        # build_identity.tap do |identity|
-        #   # this assumes there is an inverse relationship automatically created
-        #   # such as user.identities would now contain this identity for the user
-        #   identity.user = user
-        # end
-        build_identity(user: user)
+      # Option :relation - pass in relation to build Identity from
+      def build_identity(attributes = {}, options = {})
+        @provider_identity.build_record(attributes, options)
       end
 
       def update_identity!(identity)
