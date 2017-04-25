@@ -12,6 +12,7 @@ module Trusty
       # provider_attributes = OmniAuth data
       # options =
       # - :user_model = User model
+      # - :user_relation = Relation to create new User on (optional, to call #build method on)
       # - :user_attributes = Hash of attributes to merge into user_attributes
       # - :user_attributes_names = Array of attribute names to copy from Omniauth data (default: User.column_names)
       # - :user_required_criteria = Hash of criteria to use to find users, and also to merge into attributes
@@ -42,6 +43,7 @@ module Trusty
         )
         @provider_user = ModelMapper.new(self,
           :model              => @options[:user_model] || ::User,
+          :relation           => @options[:user_relation],
           :attributes         => @options[:user_attributes],
           :attribute_names    => @options[:user_attribute_names],
           :unique_identifiers => @options[:user_identifiers] || [:email],
@@ -99,8 +101,9 @@ module Trusty
 
       # USER
 
-      def build_user(attributes = {})
-        @provider_user.build_record(attributes)
+      # Option :relation - pass in relation to build Identity from
+      def build_user(attributes = {}, options = {})
+        @provider_user.build_record(attributes, options)
       end
 
       # IDENTITY
