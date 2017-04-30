@@ -34,7 +34,7 @@ module Trusty
 
       def build_record(additional_attributes = {}, options = {})
         build_relation = (options[:relation] || relation)
-        build_relation.build(attributes.merge(required_criteria).merge(additional_attributes), without_protection: true)
+        build_relation.build(attributes.merge(required_criteria).merge(additional_attributes))
       end
 
       def find_records(additional_criteria = {})
