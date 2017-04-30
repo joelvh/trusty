@@ -11,13 +11,13 @@ module Trusty
 
       # provider_attributes = OmniAuth data
       # options =
-      # - :user_model = User model
+      # - :user_model = User model class
       # - :user_relation = Relation to create new User on (optional, to call #build method on)
       # - :user_attributes = Hash of attributes to merge into user_attributes
       # - :user_attributes_names = Array of attribute names to copy from Omniauth data (default: User.column_names)
       # - :user_required_criteria = Hash of criteria to use to find users, and also to merge into attributes
       # - :user_identifiers = Array of column names that identify a model uniquely with omniauth data
-      # - :identity_model = Identity model
+      # - :identity_model = Identity model class
       # - :identity_attributes = Hash of attributes to merge into identity_attributes
       # - :identity_attribute_names = Array of attribute names to copy from Omniauth data (default: Identity.column_names)
       # - :identity_required_criteria = Hash of criteria to use to find identities, and also to merge into attributes
@@ -35,7 +35,7 @@ module Trusty
         }.merge(options)
 
         @provider_identity = ModelMapper.new(self,
-          :model              => @options[:identity_model] || ::Identity,
+          :model              => @options[:identity_model],
           :relation           => @options[:identity_relation],
           :attributes         => @options[:identity_attributes],
           :attribute_names    => @options[:identity_attribute_names],
@@ -43,7 +43,7 @@ module Trusty
           :required_criteria  => @options[:identity_required_criteria]
         )
         @provider_user = ModelMapper.new(self,
-          :model              => @options[:user_model] || ::User,
+          :model              => @options[:user_model],
           :relation           => @options[:user_relation],
           :attributes         => @options[:user_attributes],
           :attribute_names    => @options[:user_attribute_names],
