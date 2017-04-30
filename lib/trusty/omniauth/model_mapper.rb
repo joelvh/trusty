@@ -68,6 +68,8 @@ module Trusty
                             elsif prepared_relation.respond_to? :metadata
                               # Mongoid
                               prepared_relation.metadata.klass
+                            else
+                              prepared_model
                             end
 
         prepared_relation ||= if prepared_model.respond_to? :default_scoped
@@ -76,6 +78,8 @@ module Trusty
                               elsif prepared_model.respond_to? :default_scope
                                 # Mongoid
                                 prepared_model.default_scope
+                              else
+                                prepared_relation
                               end
 
         prepared_column_names = if prepared_model.respond_to? :column_names
