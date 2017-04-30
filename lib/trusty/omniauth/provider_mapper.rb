@@ -36,6 +36,7 @@ module Trusty
 
         @provider_identity = ModelMapper.new(self,
           :model              => @options[:identity_model] || ::Identity,
+          :relation           => @options[:identity_relation],
           :attributes         => @options[:identity_attributes],
           :attribute_names    => @options[:identity_attribute_names],
           :unique_identifiers => @options[:identity_identifiers] || [:provider, :uid],
