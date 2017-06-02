@@ -20,17 +20,33 @@ module Trusty
 
         if left_value.class == right_value.class
           left_value <=> right_value
+        elsif left_value.is_a?(Gem::Version)
+          if right_value.is_a?(Numeric) && right_value.negative?
+            -1
+          elsif right_value.is_a?(Integer)
+            result = left_value <=> Gem::Version.new(right_value)
+
+            if result == 0
+              1
+            else
+              result
+            end
+          elsif index == 0
+            -1
+          else
+            1
+          end
         elsif left_value.is_a?(Float)
           if right_value.is_a?(Integer)
-            if left_value < 0 || right_value < 0
-              if left_value == right_value.to_f
-                1
-              else
-                left_value <=> right_value
-              end
+            result = left_value <=> right_value
+
+            if result == 0
+              1
             else
-              Gem::Version.new(left_value) <=> Gem::Version.new(right_value)
+              result
             end
+          elsif right_value.is_a?(Gem::Version)
+            -1
           elsif index == 0
             -1
           else
@@ -38,15 +54,22 @@ module Trusty
           end
         elsif left_value.is_a?(Integer)
           if right_value.is_a?(Float)
-            if left_value < 0 || right_value < 0
-              if left_value.to_f == right_value
-                -1
-              else
-                left_value <=> right_value
-              end
+            result = left_value <=> right_value
+
+            if result == 0
+              -1
             else
-              # use version sorting in case there are multiple '.' characters
-              Gem::Version.new(left_value) <=> Gem::Version.new(right_value)
+              result
+            end
+          elsif left_value.negative?
+            -1
+          elsif right_value.is_a?(Gem::Version)
+            result = Gem::Version.new(left_value) <=> right_value
+
+            if result == 0
+              -1
+            else
+              result
             end
           elsif index == 0
             -1
@@ -64,27 +87,17 @@ module Trusty
         # Loosely based on http://stackoverflow.com/a/4079031
         # /(?<=^|\s)[-][\d\.]+|[\d\.]+|.+?/
         # /(?<=^|\s)[-][\d\.]+|[\d\.]+|[^\d\.\-]+|[^\d\.]+/
-        string.scan(/(?<=^|\s)[-][\d\.]+|[\d\.]+|.+?/).each_with_index.map do |atom, index|
-          if atom.match(/[-]?\d+(\.\d+)?/)
-            case atom.count('.')
-            when 0
-              new(atom.to_i, index + index_offset)
-            when 1
-              new(atom.to_f, index + index_offset)
-            else
-              # for strings with multiple decimals, split on '.'
-              atom.scan(/\d+|\./).each_with_index.map do |value, value_index|
-                if value.match(/\d+/)
-                  new(value.to_i, index + value_index)
-                else
-                  new(value, index + value_index)
-                end
-              end.tap{ |results| index_offset += results.size - 1 }
-            end
-          else
+        string.scan(/\d+(?:\.\d+){2,}|(?:(?<=^|\s)[-])?\d+(?:\.\d+)?|.+?/).each_with_index.map do |atom, index|
+          if !atom.match(/[-]?\d+(\.\d+)?/)
             new(normalize_string(atom), index + index_offset)
+          elsif !atom.include?('.')
+            new(atom.to_i, index + index_offset)
+          elsif atom.include?('-')
+            new(atom.to_f, index + index_offset)
+          else
+            new(Gem::Version.new(atom), index + index_offset)
           end
-        end.flatten
+        end
       end
 
       def self.sort(list)
