@@ -1,5 +1,6 @@
 require "trusty/version"
 require "trusty/environment"
+require "trusty/sorting"
 require "trusty/utilities"
 
 # Optional features that need to be required manually when using this gem
