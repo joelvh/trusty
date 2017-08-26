@@ -122,26 +122,29 @@ module Trusty
 
       def attributes(*filter_attribute_names)
         unless @attributes
-          info            = provider_attributes.fetch('info', {})
-          credentials     = provider_attributes['credentials']
+          raw_info    = provider_attributes['extra']['raw_info'] || provider_attributes['extra']
+          info        = provider_attributes.fetch('info', raw_info)
+          credentials = provider_attributes['credentials']
 
-          name            = clean(info['name'])       { [info['first_name'], info['last_name']].join(" ").strip }
-          first_name      = clean(info['first_name']) { name.split(/\s+/, 2).first }
-          last_name       = clean(info['last_name'])  { name.split(/\s+/, 2).last }
+          name       = clean(info['name'])       { [info['first_name'], info['last_name']].join(" ").strip }
+          first_name = clean(info['first_name']) { name.split(/\s+/, 2).first }
+          last_name  = clean(info['last_name'])  { name.split(/\s+/, 2).last }
+          urls       = info.fetch('urls', {})
 
           @attributes = {
             :provider       => provider_name,
             :uid            => clean(provider_attributes['uid']),
             :name           => name,
+            :company        => info['company'] || raw_info['company'],
             :email          => clean(info['email'], :downcase, :strip),
-            :verified       => provider_attributes['extra']['raw_info']['verified_email'] == true,
+            :verified       => !!(raw_info['verified_email'] || raw_info['verified']),
             :username       => clean(info['nickname']),
             :first_name     => first_name,
             :middle_name    => clean(info['middle_name']),
             :last_name      => last_name,
-            :phone          => clean(info['phone']),
+            :phone          => clean(info['phone'] || raw_info['sms_number']),
             :image_url      => info['image'],
-            :profile_url    => info.fetch('urls', {})['public_profile'],
+            :profile_url    => urls['public_profile'] || urls['GitHub'] || raw_info['blog'],
             :token_type     => clean(credentials['token_type']),
             :token          => clean(credentials['token']),
             :secret         => clean(credentials['secret']),
@@ -150,7 +153,7 @@ module Trusty
             :expires_at     => (Time.at(credentials['expires_at']) rescue nil),
             :raw_info       => provider_attributes['extra'].except('access_token').as_json,
             # extra
-            :location       => info['location'],
+            :location       => info['location'] || raw_info['location'],
             :time_zone      => info['time_zone'] || Time.zone.name,
             :locale         => info['locale'] || I18n.locale
           }.with_indifferent_access
