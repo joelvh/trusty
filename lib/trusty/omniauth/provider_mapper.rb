@@ -122,11 +122,7 @@ module Trusty
 
       def attributes(*filter_attribute_names)
         unless @attributes
-          raw_info    = provider_attributes['extra']['raw_info'] || provider_attributes['extra']
-          info        = provider_attributes.fetch('info', raw_info)
-          credentials = provider_attributes['credentials']
-
-          name       = clean(info['name'])       { [info['first_name'], info['last_name']].join(" ").strip }
+          name       = clean(info['name'])       { info.values_at('first_name', 'last_name').join(' ').strip }
           first_name = clean(info['first_name']) { name.split(/\s+/, 2).first }
           last_name  = clean(info['last_name'])  { name.split(/\s+/, 2).last }
           urls       = info.fetch('urls', {})
@@ -137,14 +133,14 @@ module Trusty
             :name           => name,
             :company        => info['company'] || raw_info['company'],
             :email          => clean(info['email'], :downcase, :strip),
-            :verified       => !!(raw_info['verified_email'] || raw_info['verified'] || raw_info['confirmed']),
+            :verified       => !!first_for(raw_info, %w{verified_email email_verified verified confirmed verified_account}),
             :username       => clean(info['nickname']),
             :first_name     => first_name,
             :middle_name    => clean(info['middle_name']),
             :last_name      => last_name,
             :phone          => clean(info['phone'] || raw_info['sms_number']),
             :image_url      => info['image'],
-            :profile_url    => urls['profile'] || urls['public_profile'] || urls['GitHub'] || raw_info['url'] || raw_info['blog'],
+            :profile_url    => first_for(urls, %w{profile public_profile GitHub}) || first_for(raw_info, %w{url blog}),
             :token_type     => clean(credentials['token_type']),
             :token          => clean(credentials['token']),
             :secret         => clean(credentials['secret']),
@@ -169,6 +165,25 @@ module Trusty
         end
       end
 
+    private
+
+      def raw_info
+        @raw_info ||= provider_attributes['extra']['raw_info'] || provider_attributes['extra']
+      end
+
+      def info
+        @info ||= provider_attributes.fetch('info', raw_info)
+      end
+
+      def credentials
+        provider_attributes['credentials']
+      end
+
+      def first_for(hash, *names)
+        key = names.flatten.find{ |name| hash[name] }
+
+        hash[key]
+      end
     end
   end
 end
