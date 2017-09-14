@@ -122,11 +122,7 @@ module Trusty
 
       def attributes(*filter_attribute_names)
         unless @attributes
-          raw_info    = provider_attributes['extra']['raw_info'] || provider_attributes['extra']
-          info        = provider_attributes.fetch('info', raw_info)
-          credentials = provider_attributes['credentials']
-
-          name       = clean(info['name'])       { [info['first_name'], info['last_name']].join(" ").strip }
+          name       = clean(info['name'])       { info.values_at('first_name', 'last_name').join(' ').strip }
           first_name = clean(info['first_name']) { name.split(/\s+/, 2).first }
           last_name  = clean(info['last_name'])  { name.split(/\s+/, 2).last }
           urls       = info.fetch('urls', {})
@@ -137,7 +133,7 @@ module Trusty
             :name           => name,
             :company        => info['company'] || raw_info['company'],
             :email          => clean(info['email'], :downcase, :strip),
-            :verified       => !!(raw_info['verified_email'] || raw_info['verified'] || raw_info['confirmed']),
+            :verified       => !!first_for(raw_info, %w{verified_email email_verified verified confirmed verified_account}),
             :username       => clean(info['nickname']),
             :first_name     => first_name,
             :middle_name    => clean(info['middle_name']),
@@ -171,6 +167,18 @@ module Trusty
 
     private
 
+      def raw_info
+        @raw_info ||= provider_attributes['extra']['raw_info'] || provider_attributes['extra']
+      end
+
+      def info
+        @info ||= provider_attributes.fetch('info', raw_info)
+      end
+
+      def credentials
+        provider_attributes['credentials']
+      end
+
       def detect_profile_url(hash)
         keywords = [provider_name] + %w[profile blog company]
 
@@ -178,6 +186,12 @@ module Trusty
           matched_key = hash.keys.find{ |key| key =~ /#{keyword}/i }
           return hash[matched_key] if matched_key
         end
+      end
+
+      def first_for(hash, *names)
+        key = names.flatten.find{ |name| hash[name] }
+
+        hash[key]
       end
     end
   end

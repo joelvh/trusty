@@ -101,7 +101,6 @@ module Trusty
       def stringify_keys(original_hash)
         original_hash.each_with_object({}){|(key, value), hash| hash[key.to_s] = value}
       end
-
     end
   end
 end
