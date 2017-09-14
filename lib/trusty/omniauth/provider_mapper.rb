@@ -144,7 +144,7 @@ module Trusty
             :last_name      => last_name,
             :phone          => clean(info['phone'] || raw_info['sms_number']),
             :image_url      => info['image'],
-            :profile_url    => urls['profile'] || urls['public_profile'] || urls['GitHub'] || raw_info['url'] || raw_info['blog'],
+            :profile_url    => detect_profile_url(urls) || raw_info['url'] || raw_info['blog'],
             :token_type     => clean(credentials['token_type']),
             :token          => clean(credentials['token']),
             :secret         => clean(credentials['secret']),
@@ -169,6 +169,16 @@ module Trusty
         end
       end
 
+    private
+
+      def detect_profile_url(hash)
+        keywords = [provider_name] + %w[profile blog company]
+
+        keywords.each do |keyword|
+          matched_key = hash.keys.find{ |key| key =~ /#{keyword}/i }
+          return hash[matched_key] if matched_key
+        end
+      end
     end
   end
 end
