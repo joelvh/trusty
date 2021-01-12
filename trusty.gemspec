@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rails", ">= 3"
   
   # Trusty::Omniauth
-  spec.add_development_dependency "omniauth", "~> 1"
+  spec.add_development_dependency "omniauth", "~> 2"
   
   # Trusty::Errors::ExceptionHandlers
   spec.add_development_dependency "activesupport", ">= 3" # active_support/notifications
